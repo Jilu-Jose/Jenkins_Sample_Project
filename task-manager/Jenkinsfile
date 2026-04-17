@@ -1,0 +1,30 @@
+pipeline {
+    agent any
+
+    environment {
+        IMAGE_NAME = 'simple-task-manager'
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+        
+        stage('Build Docker Image') {
+            steps {
+                bat 'docker build -t %IMAGE_NAME%:latest .'
+            }
+        }
+        
+        stage('Deploy Container Locally') {
+            steps {
+                bat 'docker stop task-manager-container || exit 0'
+                bat 'docker rm task-manager-container || exit 0'
+                
+                bat 'docker run -d -p 8080:80 --name task-manager-container %IMAGE_NAME%:latest'
+            }
+        }
+    }
+}
