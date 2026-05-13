@@ -15,38 +15,38 @@ pipeline {
                 checkout scm
             }
         }
-        
+
         stage('Build Docker Image') {
             steps {
-                bat "docker build -t %DOCKER_REGISTRY%/%IMAGE_NAME%:%IMAGE_TAG% -t %DOCKER_REGISTRY%/%IMAGE_NAME%:latest ."
+                sh "docker build -t ${DOCKER_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG} -t ${DOCKER_REGISTRY}/${IMAGE_NAME}:latest ./task-manager"
             }
         }
 
         stage('Health Validation') {
             steps {
-                bat 'docker run -d -p 8080:80 --name test-container %DOCKER_REGISTRY%/%IMAGE_NAME%:%IMAGE_TAG%'
+                sh "docker run -d -p 8080:80 --name test-container ${DOCKER_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}"
                 sleep time: 5, unit: 'SECONDS'
-                bat 'curl -f http://localhost:8080 || exit 1'
-                bat 'docker stop test-container'
-                bat 'docker rm test-container'
+                sh 'curl -f http://localhost:8080 || exit 1'
+                sh 'docker stop test-container'
+                sh 'docker rm test-container'
             }
         }
-        
+
         stage('Push to Registry') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', passwordVariable: 'DOCKER_PASS', usernameVariable: 'DOCKER_USER')]) {
-                    bat 'echo %DOCKER_PASS% | docker login -u %DOCKER_USER% --password-stdin'
-                    bat 'docker push %DOCKER_REGISTRY%/%IMAGE_NAME%:%IMAGE_TAG%'
-                    bat 'docker push %DOCKER_REGISTRY%/%IMAGE_NAME%:latest'
+                    sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
+                    sh "docker push ${DOCKER_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}"
+                    sh "docker push ${DOCKER_REGISTRY}/${IMAGE_NAME}:latest"
                 }
             }
         }
-        
+
         stage('Deploy to AWS EC2') {
             steps {
                 sshagent(['ec2-ssh-key']) {
-                    bat """
-                    ssh -o StrictHostKeyChecking=no %EC2_USER%@%EC2_HOST% "docker pull %DOCKER_REGISTRY%/%IMAGE_NAME%:latest && (docker stop task-manager-container || exit 0) && (docker rm task-manager-container || exit 0) && docker run -d -p 80:80 --name task-manager-container %DOCKER_REGISTRY%/%IMAGE_NAME%:latest"
+                    sh """
+                    ssh -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_HOST} 'docker pull ${DOCKER_REGISTRY}/${IMAGE_NAME}:latest && (docker stop task-manager-container || true) && (docker rm task-manager-container || true) && docker run -d -p 80:80 --name task-manager-container ${DOCKER_REGISTRY}/${IMAGE_NAME}:latest'
                     """
                 }
             }
