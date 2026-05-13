@@ -2,7 +2,11 @@ pipeline {
     agent any
 
     environment {
+        DOCKER_REGISTRY = 'jilujose2004'
         IMAGE_NAME = 'simple-task-manager'
+        IMAGE_TAG = "${env.BUILD_NUMBER}"
+        EC2_USER = 'ubuntu'
+        EC2_HOST = 'ec2-3-95-66-80.compute-1.amazonaws.com'
     }
 
     stages {
@@ -14,16 +18,37 @@ pipeline {
         
         stage('Build Docker Image') {
             steps {
-                bat 'docker build -t %IMAGE_NAME%:latest .'
+                bat "docker build -t %DOCKER_REGISTRY%/%IMAGE_NAME%:%IMAGE_TAG% -t %DOCKER_REGISTRY%/%IMAGE_NAME%:latest ."
+            }
+        }
+
+        stage('Health Validation') {
+            steps {
+                bat 'docker run -d -p 8080:80 --name test-container %DOCKER_REGISTRY%/%IMAGE_NAME%:%IMAGE_TAG%'
+                sleep time: 5, unit: 'SECONDS'
+                bat 'curl -f http://localhost:8080 || exit 1'
+                bat 'docker stop test-container'
+                bat 'docker rm test-container'
             }
         }
         
-        stage('Deploy Container Locally') {
+        stage('Push to Registry') {
             steps {
-                bat 'docker stop task-manager-container || exit 0'
-                bat 'docker rm task-manager-container || exit 0'
-                
-                bat 'docker run -d -p 8080:80 --name task-manager-container %IMAGE_NAME%:latest'
+                withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', passwordVariable: 'DOCKER_PASS', usernameVariable: 'DOCKER_USER')]) {
+                    bat 'echo %DOCKER_PASS% | docker login -u %DOCKER_USER% --password-stdin'
+                    bat 'docker push %DOCKER_REGISTRY%/%IMAGE_NAME%:%IMAGE_TAG%'
+                    bat 'docker push %DOCKER_REGISTRY%/%IMAGE_NAME%:latest'
+                }
+            }
+        }
+        
+        stage('Deploy to AWS EC2') {
+            steps {
+                sshagent(['ec2-ssh-key']) {
+                    bat """
+                    ssh -o StrictHostKeyChecking=no %EC2_USER%@%EC2_HOST% "docker pull %DOCKER_REGISTRY%/%IMAGE_NAME%:latest && (docker stop task-manager-container || exit 0) && (docker rm task-manager-container || exit 0) && docker run -d -p 80:80 --name task-manager-container %DOCKER_REGISTRY%/%IMAGE_NAME%:latest"
+                    """
+                }
             }
         }
     }
