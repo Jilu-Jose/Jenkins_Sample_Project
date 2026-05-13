@@ -4,24 +4,24 @@
 
 ---
 
-## 🌐 Live Demo
+##  Live Demo
 
 **Public URL:** [http://ec2-3-95-66-80.compute-1.amazonaws.com](http://ec2-3-95-66-80.compute-1.amazonaws.com)
 
 ---
 
-## ✨ Features
+##  Features
 
-- 📝 Write and publish blog posts with a title and content
-- 🗑️ Delete posts with a confirmation modal
-- 💬 Character counter on the content field
-- ⌨️ Keyboard shortcut: `Ctrl+Enter` to publish
-- 🎨 Clean editorial design with Playfair Display typography
-- 📱 Fully responsive layout
+-  Write and publish blog posts with a title and content
+-  Delete posts with a confirmation modal
+-  Character counter on the content field
+-  Keyboard shortcut: `Ctrl+Enter` to publish
+-  Clean editorial design with Playfair Display typography
+-  Fully responsive layout
 
 ---
 
-## 🏗️ Tech Stack
+##  Tech Stack
 
 | Layer | Technology |
 |-------|-----------|
@@ -33,7 +33,7 @@
 
 ---
 
-## 🐳 Docker Setup
+##  Docker Setup
 
 The app is containerized using a minimal NGINX-based Docker image.
 
@@ -59,7 +59,7 @@ Then visit: `http://localhost:8080`
 
 ---
 
-## 🔁 CI/CD Pipeline (Jenkins)
+##  CI/CD Pipeline (Jenkins)
 
 The project uses a `Jenkinsfile` to fully automate the deployment lifecycle — from source code to a running container on AWS EC2.
 
@@ -78,29 +78,29 @@ Checkout SCM → Checkout → Build Docker Image → Health Validation → Push 
 | **Push to Registry** | Pushes the verified image to Docker Hub |
 | **Deploy to AWS EC2** | SSHs into EC2, pulls the new image, replaces the old container |
 
-### ✅ Successful Pipeline Run
+###  Successful Pipeline Run
 
 All 6 stages passing — Build #7 completed in 50 seconds:
 
-![Jenkins Pipeline - All Stages Passing](docs/jenkins-pipeline.png)
+![Jenkins Pipeline - All Stages Passing](docs/Jenkins-Pipeline.png)
 
 ---
 
-## ☁️ AWS EC2 Deployment
+##  AWS EC2 Deployment
 
 The app runs on an AWS EC2 `t3.micro` instance in `us-east-1`. The Jenkins pipeline SSHs into the instance and hot-swaps the running container with the latest image — zero manual steps required.
 
-![AWS EC2 Instance - Running](docs/aws-ec2.png)
+![AWS EC2 Instance - Running](docs/AWS_Instance.png)
 
 **Instance Details:**
 - **Region:** us-east-1c
 - **Type:** t3.micro
 - **Public DNS:** `ec2-3-95-66-80.compute-1.amazonaws.com`
-- **Status:** ✅ Running
+- **Status:**  Running
 
 ---
 
-## 🔐 Jenkins Credentials Required
+##  Jenkins Credentials Required
 
 Before running the pipeline, set up these credentials in Jenkins (`Manage Jenkins → Credentials`):
 
@@ -111,7 +111,7 @@ Before running the pipeline, set up these credentials in Jenkins (`Manage Jenkin
 
 ---
 
-## 📁 Project Structure
+##  Project Structure
 
 ```
 Jenkins_Sample_Project/
@@ -129,7 +129,7 @@ Jenkins_Sample_Project/
 
 ---
 
-## 🚀 How to Reproduce This Setup
+##  How to Reproduce This Setup
 
 1. Fork this repo and push to your GitHub
 2. Launch an AWS EC2 instance (Ubuntu 22.04, t3.micro) with port 80 and 22 open
@@ -137,4 +137,4 @@ Jenkins_Sample_Project/
 4. Run Jenkins in Docker locally with the Docker socket mounted
 5. Add `dockerhub-creds` and `ec2-ssh-key` credentials in Jenkins
 6. Create a Pipeline job pointing to this repo with `task-manager/Jenkinsfile`
-7. Click **Build Now** — your app deploys automatically ✅
+7. Click **Build Now** — your app deploys automatically 
