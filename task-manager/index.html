@@ -1,21 +1,84 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Task Manager</title>
-    <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Inkwell — My Blog</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-    <div class="container">
-        <h1>Task Manager</h1>
-        <div class="input-section">
-            <input type="text" id="taskInput" placeholder="What needs to be done?">
-            <button id="addTaskBtn">Add</button>
-        </div>
-        <ul id="taskList"></ul>
+
+  <div class="noise-overlay"></div>
+
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="logo">
+        <span class="logo-icon">✦</span>
+        <span class="logo-text">Inkwell</span>
+      </div>
+      <p class="tagline">Write. Reflect. Share.</p>
     </div>
-    <script src="script.js"></script>
+  </header>
+
+  <main class="container">
+
+    <!-- Compose Section -->
+    <section class="compose-section">
+      <div class="section-label">New Entry</div>
+      <div class="compose-card">
+        <div class="input-group">
+          <label for="title">Title</label>
+          <input type="text" id="title" placeholder="Give your post a title..." autocomplete="off" />
+        </div>
+        <div class="input-group">
+          <label for="content">Your Thoughts</label>
+          <textarea id="content" placeholder="What's on your mind today?"></textarea>
+        </div>
+        <div class="form-footer">
+          <span class="char-count" id="charCount">0 characters</span>
+          <button class="post-btn" id="postBtn" onclick="addBlog()">
+            <span class="btn-text">Publish Post</span>
+            <span class="btn-icon">→</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Blog Feed -->
+    <section class="feed-section">
+      <div class="feed-header">
+        <div class="section-label">Your Posts</div>
+        <span class="post-count" id="postCount">0 posts</span>
+      </div>
+
+      <div id="emptyState" class="empty-state">
+        <div class="empty-icon">✦</div>
+        <p>No entries yet. Start writing your first post above.</p>
+      </div>
+
+      <div id="blogList"></div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <p>Made with <span>♥</span> · Inkwell Blog</p>
+  </footer>
+
+  <!-- Delete Confirmation Modal -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+      <p class="modal-title">Delete this post?</p>
+      <p class="modal-sub">This action cannot be undone.</p>
+      <div class="modal-actions">
+        <button class="modal-cancel" onclick="closeModal()">Cancel</button>
+        <button class="modal-confirm" id="confirmDelete">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
 </body>
 </html>
