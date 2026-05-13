@@ -1,56 +1,140 @@
-# Simple Task Manager
+# ✦ Inkwell — A Minimal Blog App
 
-A minimalistic, lightweight, and responsive Task Manager (To-Do List) web application built purely with HTML, CSS, and JavaScript. The project demonstrates core frontend development without the use of any heavy frameworks, and serves as an excellent starting point for learning about containerization and CI/CD pipelines.
-
-## Features
-- Add new tasks
-- Mark tasks as completed
-- Delete tasks
-- Clean, modern UI with dark mode support
+> A lightweight, elegant blog application built with pure HTML, CSS, and JavaScript. Write, publish, and manage your thoughts — all in the browser. Containerized with Docker and deployed to AWS EC2 via a fully automated Jenkins CI/CD pipeline.
 
 ---
 
-## 🐳 Docker Integration
+## 🌐 Live Demo
 
-The application is containerized using Docker and served with NGINX. 
-
-### Understanding the Dockerfile
-The `Dockerfile` is a set of instructions used to build the image for the application:
-- `FROM nginx:alpine`: Uses the official, lightweight Alpine-based NGINX web server image as the foundation.
-- `COPY ...`: Copies the static application files (`index.html`, `style.css`, `script.js`) from our local directory into NGINX's default public hosting directory (`/usr/share/nginx/html/`).
-- `EXPOSE 80`: Exposes container port 80 to allow incoming web traffic to reach the NGINX server.
-
-### Local Docker Commands
-If you want to build and run the application manually without a pipeline, use the following commands across the terminal.
-
-**1. Build the Docker image:**
-```bash
-docker build -t task-manager-app .
-```
-*(This tells Docker to build an image named "task-manager-app" using the `Dockerfile` located in the current directory `.`)*
-
-**2. Run the Docker container:**
-```bash
-docker run -d -p 8080:80 --name my-task-app task-manager-app
-```
-*(This starts a container in detached mode (`-d`), mapping your machine's port 8080 to the container's port 80, and names the running instance "my-task-app". You can access the app at `http://localhost:8080`.)*
+**Public URL:** [http://ec2-3-95-66-80.compute-1.amazonaws.com](http://ec2-3-95-66-80.compute-1.amazonaws.com)
 
 ---
 
-##  CI/CD Pipeline (Jenkins)
+## ✨ Features
 
-The project includes a `Jenkinsfile` to automate the process of building the Docker image and deploying the container whenever new code is pushed.
+- 📝 Write and publish blog posts with a title and content
+- 🗑️ Delete posts with a confirmation modal
+- 💬 Character counter on the content field
+- ⌨️ Keyboard shortcut: `Ctrl+Enter` to publish
+- 🎨 Clean editorial design with Playfair Display typography
+- 📱 Fully responsive layout
 
-### Pipeline Stages (`Jenkinsfile`)
-The pipeline executes the following stages sequentially:
+---
 
-1. **Checkout**: Jenkins downloads the latest version of the code directly from the GitHub repository.
-2. **Build Docker Image**: Automatically runs `docker build` to create a fresh container image infused with the latest updates to the HTML/CSS/JS files.
-3. **Deploy Container Locally**: 
-    - Halts and removes any old instances of the container running from previous builds to prevent port collision.
-    - Spins up a fresh container instance (`docker run`) on port 8080 serving the newly built image.
+## 🏗️ Tech Stack
 
-To utilize this CI/CD Pipeline:
-- Push the repository to GitHub.
-- Set up a Jenkins Pipeline project.
-- Point the pipeline source at the GitHub repository URL to automatically execute the `Jenkinsfile` on every execution.
+| Layer | Technology |
+|-------|-----------|
+| Frontend | HTML5, CSS3, Vanilla JavaScript |
+| Web Server | NGINX (Alpine) |
+| Containerization | Docker |
+| CI/CD | Jenkins |
+| Cloud Deployment | AWS EC2 (t3.micro) |
+
+---
+
+## 🐳 Docker Setup
+
+The app is containerized using a minimal NGINX-based Docker image.
+
+### Dockerfile
+```dockerfile
+FROM nginx:alpine
+COPY index.html /usr/share/nginx/html/
+COPY style.css  /usr/share/nginx/html/
+COPY script.js  /usr/share/nginx/html/
+EXPOSE 80
+```
+
+### Run Locally
+```bash
+# Build the image
+docker build -t inkwell-blog ./task-manager
+
+# Run the container
+docker run -d -p 8080:80 --name inkwell inkwell-blog
+```
+
+Then visit: `http://localhost:8080`
+
+---
+
+## 🔁 CI/CD Pipeline (Jenkins)
+
+The project uses a `Jenkinsfile` to fully automate the deployment lifecycle — from source code to a running container on AWS EC2.
+
+### Pipeline Stages
+
+```
+Checkout SCM → Checkout → Build Docker Image → Health Validation → Push to Registry → Deploy to AWS EC2
+```
+
+| Stage | Description |
+|-------|-------------|
+| **Checkout SCM** | Jenkins clones the latest code from GitHub |
+| **Checkout** | Re-verifies the working directory |
+| **Build Docker Image** | Builds the Docker image tagged with build number and `latest` |
+| **Health Validation** | Runs the container, hits it with `curl`, confirms it returns HTTP 200 |
+| **Push to Registry** | Pushes the verified image to Docker Hub |
+| **Deploy to AWS EC2** | SSHs into EC2, pulls the new image, replaces the old container |
+
+### ✅ Successful Pipeline Run
+
+All 6 stages passing — Build #7 completed in 50 seconds:
+
+![Jenkins Pipeline - All Stages Passing](docs/jenkins-pipeline.png)
+
+---
+
+## ☁️ AWS EC2 Deployment
+
+The app runs on an AWS EC2 `t3.micro` instance in `us-east-1`. The Jenkins pipeline SSHs into the instance and hot-swaps the running container with the latest image — zero manual steps required.
+
+![AWS EC2 Instance - Running](docs/aws-ec2.png)
+
+**Instance Details:**
+- **Region:** us-east-1c
+- **Type:** t3.micro
+- **Public DNS:** `ec2-3-95-66-80.compute-1.amazonaws.com`
+- **Status:** ✅ Running
+
+---
+
+## 🔐 Jenkins Credentials Required
+
+Before running the pipeline, set up these credentials in Jenkins (`Manage Jenkins → Credentials`):
+
+| ID | Type | Purpose |
+|----|------|---------|
+| `dockerhub-creds` | Username with password | Push image to Docker Hub |
+| `ec2-ssh-key` | SSH Username with private key | SSH into EC2 for deployment |
+
+---
+
+## 📁 Project Structure
+
+```
+Jenkins_Sample_Project/
+├── task-manager/
+│   ├── index.html       # Blog app HTML
+│   ├── style.css        # Inkwell stylesheet
+│   ├── script.js        # Blog logic
+│   ├── Dockerfile       # NGINX container config
+│   └── Jenkinsfile      # CI/CD pipeline definition
+├── docs/
+│   ├── jenkins-pipeline.png
+│   └── aws-ec2.png
+└── README.md
+```
+
+---
+
+## 🚀 How to Reproduce This Setup
+
+1. Fork this repo and push to your GitHub
+2. Launch an AWS EC2 instance (Ubuntu 22.04, t3.micro) with port 80 and 22 open
+3. Install Docker on EC2
+4. Run Jenkins in Docker locally with the Docker socket mounted
+5. Add `dockerhub-creds` and `ec2-ssh-key` credentials in Jenkins
+6. Create a Pipeline job pointing to this repo with `task-manager/Jenkinsfile`
+7. Click **Build Now** — your app deploys automatically ✅
