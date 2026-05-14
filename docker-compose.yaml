@@ -1,0 +1,7 @@
+services:
+  web:
+    build:
+      context: ./task-manager
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
