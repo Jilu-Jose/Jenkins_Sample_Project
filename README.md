@@ -82,7 +82,7 @@ Checkout SCM → Checkout → Build Docker Image → Health Validation → Push 
 
 All 6 stages passing — Build #7 completed in 50 seconds:
 
-![Jenkins Pipeline - All Stages Passing](docs\Jenkins_Pipeline.png)
+![Jenkins Pipeline - All Stages Passing](docs/Jenkins_Pipeline.png)
 
 ---
 
